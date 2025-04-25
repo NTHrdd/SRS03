@@ -1,6 +1,5 @@
+#include "morse_translator.h"
 #include <iostream>
-#include <string>
-#include <map>
 #include <fcntl.h>
 
 /**
@@ -18,8 +17,10 @@
  */
 int main() {
     std::setlocale(LC_ALL, "");
+
     _setmode(_fileno(stdout), _O_U16TEXT);
-    std::map<wchar_t, std::wstring> morse = {
+
+    const std::map<wchar_t, std::wstring> morse = {
             {L'А', L".-"},    {L'Б', L"-..."},  {L'В', L".--"},   {L'Г', L"--."},
             {L'Д', L"-.."},   {L'Е', L"."},     {L'Ж', L"...-"},  {L'З', L"--.."},
             {L'И', L".."},    {L'Й', L".---"},  {L'К', L"-.-"},   {L'Л', L".-.."},
@@ -31,21 +32,21 @@ int main() {
     };
 
     std::wcout << L"Введите сообщение на русском языке: ";
-    std::wstring message;
-    std::getline(std::wcin, message);
+    std::wstring message = L"";
+
+    if (!std::getline(std::wcin, message)) {
+        std::wcerr << L"Ошибка чтения ввода." << std::endl;
+        return 1;
+    }
+
+    if (message.empty()) {
+        std::wcout << L"Ввод пустой. Сообщение не будет переведено." << std::endl;
+        return 0;
+    }
 
     std::wcout << L"Сообщение в азбуке Морзе:\n";
 
-    for (wchar_t ch : message) {
-        if (ch == L' ') {
-            std::wcout << L"/ ";
-        } else {
-            wchar_t upperCh = std::towupper(ch);
-            if (morse.count(upperCh)) {
-                std::wcout << morse[upperCh] << L" ";
-            }
-        }
-    }
+    translate_to_morse(message, morse);
 
     std::wcout << std::endl;
     return 0;
